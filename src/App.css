@@ -1,0 +1,18 @@
+/* Styles for the exercise details */
+.exercise-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exercise-details span {
+  font-size: 14px;
+}
+
+.exercise-details .username {
+  font-weight: bold;
+}
+
+.exercise-details .date {
+  font-style: italic;
+}
