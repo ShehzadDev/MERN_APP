@@ -5,19 +5,31 @@ export default function ExerciseList() {
   const [exercises, setExercises] = useState([]);
   const [editingExerciseId, setEditingExerciseId] = useState('');
   const [editingExerciseData, setEditingExerciseData] = useState({});
-
+\
   useEffect(() => {
-    axios.get('http://localhost:5000/exercises')
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+    axios.get('http://localhost:5000/exercises', {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      },
+    })
       .then(response => {
         setExercises(response.data);
       })
       .catch(error => {
         console.error('Error fetching exercises:', error);
-      });
-  }, []);
+
+      }, []);
 
   const handleDelete = (exerciseId) => {
-    axios.delete(`http://localhost:5000/exercises/delete/${exerciseId}`)
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+    axios.delete(`http://localhost:5000/exercises/delete/${exerciseId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      },
+    })
       .then(response => {
         console.log(response.data);
         // Remove the deleted exercise from the list
@@ -35,7 +47,13 @@ export default function ExerciseList() {
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    axios.post(`http://localhost:5000/exercises/update/${editingExerciseId}`, editingExerciseData)
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+    axios.post(`http://localhost:5000/exercises/update/${editingExerciseId}`, editingExerciseData, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      },
+    })
       .then(response => {
         console.log(response.data);
         setEditingExerciseId('');
@@ -79,11 +97,14 @@ export default function ExerciseList() {
                 </button>
               </form>
             ) : (
-              <div className="exercise-details">
-                <span className="username">Username: {exercise.username}</span>
-                <span className="description">Description: {exercise.description}</span>
-                <span className="duration">Duration: {exercise.duration} minutes</span>
-                <span className="date">Date: {new Date(exercise.date).toLocaleDateString()}</span>
+              <div>
+                  <div className="exercise-details">
+                    <span className="username">Username: {exercise.username}</span>
+                    <span className="description">Description: {exercise.description}</span>
+                    <span className="duration">Duration: {exercise.duration} minutes</span>
+                    <span className="date">Date: {new Date(exercise.date).toLocaleDateString()}</span>
+                  </div>
+                <hr className="my-2 border-gray-300" />
               </div>
             )}
             <div className="flex space-x-2">

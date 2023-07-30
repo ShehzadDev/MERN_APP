@@ -19,7 +19,13 @@ export default function AddExerciseForm() {
       date: Date.parse(date)
     };
 
-    axios.post('http://localhost:5000/exercises/add', newExercise)
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+    axios.post('http://localhost:5000/exercises/add', newExercise, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the headers
+      },
+    })
       .then(response => {
         console.log(response.data);
         // Redirect to the "exercises" page after successful insertion
@@ -45,6 +51,7 @@ export default function AddExerciseForm() {
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Enter username"
           className="border border-gray-300 rounded-md p-2 w-full"
+          required
         />
         <input
           type="text"
@@ -52,6 +59,7 @@ export default function AddExerciseForm() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Enter exercise description"
           className="border border-gray-300 rounded-md p-2 w-full"
+          required
         />
         <input
           type="number"
@@ -59,12 +67,14 @@ export default function AddExerciseForm() {
           onChange={(e) => setDuration(e.target.value)}
           placeholder="Enter duration in minutes"
           className="border border-gray-300 rounded-md p-2 w-full"
+          required
         />
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           className="border border-gray-300 rounded-md p-2 w-full"
+          required
         />
         <button type="submit" className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-md">
           Add Exercise
