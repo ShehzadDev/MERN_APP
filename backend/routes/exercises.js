@@ -22,16 +22,16 @@ const authenticateUser = (req, res, next) => {
 };
 
 // Route for getting all exercises
-router.route('/').get(authenticateUser, (req, res) => {
-  Exercise.find({ userId: req.user.userId })
+router.get('/', authenticateUser, (req, res) => {
+  Exercise.find({ user: req.user.userId })
     .then(exercises => res.json(exercises))
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
 // Route for adding a new exercise
-router.route('/add').post(authenticateUser, (req, res) => {
+router.post('/add', authenticateUser, (req, res) => {
   const { description, duration, date } = req.body;
-  const newExercise = new Exercise({ userId: req.user.userId, description, duration, date });
+  const newExercise = new Exercise({ user: req.user.userId, description, duration, date });
 
   newExercise.save()
     .then(() => res.json('Exercise added successfully!'))
@@ -39,10 +39,14 @@ router.route('/add').post(authenticateUser, (req, res) => {
 });
 
 // Route for updating an exercise
-router.route('/update/:id').post(authenticateUser, (req, res) => {
+router.post('/update/:id', authenticateUser, (req, res) => {
   Exercise.findById(req.params.id)
     .then(exercise => {
-      if (exercise.userId !== req.user.userId) {
+      if (!exercise) {
+        return res.status(404).json({ message: 'Exercise not found' });
+      }
+
+      if (!exercise.user.equals(req.user.userId)) {
         return res.status(403).json({ message: 'You are not authorized to update this exercise' });
       }
 
@@ -57,10 +61,14 @@ router.route('/update/:id').post(authenticateUser, (req, res) => {
 });
 
 // Route for deleting an exercise
-router.route('/delete/:id').delete(authenticateUser, (req, res) => {
+router.delete('/delete/:id', authenticateUser, (req, res) => {
   Exercise.findById(req.params.id)
     .then(exercise => {
-      if (exercise.userId !== req.user.userId) {
+      if (!exercise) {
+        return res.status(404).json({ message: 'Exercise not found' });
+      }
+
+      if (!exercise.user.equals(req.user.userId)) {
         return res.status(403).json({ message: 'You are not authorized to delete this exercise' });
       }
 

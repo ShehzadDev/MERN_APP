@@ -1,12 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, Link, Redirect } from 'react-router-dom';
 import ExerciseList from './components/ExerciseList';
 import AddExerciseForm from './components/AddExerciseForm';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import './App.css'; // Import the App.css file to apply the styles
+import './App.css';
 
 const App = () => {
+  // Check if the user is authenticated using the token
+  const isAuthenticated = !!localStorage.getItem('token');
+
   return (
     <Router>
       <div className="bg-gray-100 min-h-screen">
@@ -25,16 +28,34 @@ const App = () => {
                   Exercises
                 </Link>
               </li>
-              <li>
-                <Link className="text-white hover:text-gray-200" to="/login">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link className="text-white hover:text-gray-200" to="/signup">
-                  Sign Up
-                </Link>
-              </li>
+              {!isAuthenticated && (
+                <>
+                  <li>
+                    <Link className="text-white hover:text-gray-200" to="/login">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="text-white hover:text-gray-200" to="/signup">
+                      Sign Up
+                    </Link>
+                  </li>
+                </>
+              )}
+              {isAuthenticated && (
+                <li>
+                  <button
+                    className="text-white hover:text-gray-200"
+                    onClick={() => {
+                      // Remove the token on logout
+                      localStorage.removeItem('token');
+                      window.location.reload(); // Reload the page to update the navbar
+                    }}
+                  >
+                    Logout
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </nav>
@@ -44,8 +65,15 @@ const App = () => {
           <Switch>
             <Route exact path="/exercises" component={ExerciseList} />
             <Route exact path="/exercises/add" component={AddExerciseForm} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/signup" component={Signup} />
+            <Route exact path="/login">
+              {isAuthenticated ? <Redirect to="/exercises" /> : <Login />}
+            </Route>
+            <Route exact path="/signup">
+              {isAuthenticated ? <Redirect to="/exercises" /> : <Signup />}
+            </Route>
+            <Route path="/">
+              <Redirect to="/exercises" />
+            </Route>
           </Switch>
         </div>
       </div>

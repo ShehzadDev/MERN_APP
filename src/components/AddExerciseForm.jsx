@@ -1,85 +1,94 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useHistory } from 'react-router-dom';
+import axios from 'axios';
 
-export default function AddExerciseForm() {
-  const [username, setUsername] = useState('');
-  const [description, setDescription] = useState('');
-  const [duration, setDuration] = useState('');
-  const [date, setDate] = useState('');
+const AddExerciseForm = () => {
+  const [formData, setFormData] = useState({
+    description: '',
+    duration: 0,
+    date: new Date().toISOString().slice(0, 10), // Initialize with today's date
+  });
+
   const history = useHistory();
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newExercise = {
-      username,
-      description,
-      duration: Number(duration),
-      date: Date.parse(date)
-    };
-
     const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
-    axios.post('http://localhost:5000/exercises/add', newExercise, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Include the token in the headers
-      },
-    })
-      .then(response => {
-        console.log(response.data);
-        // Redirect to the "exercises" page after successful insertion
-        history.push('/exercises');
-      })
-      .catch(error => {
-        console.error('Error adding exercise:', error);
+    try {
+      const response = await axios.post('http://localhost:5000/exercises/add', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
       });
 
-    setUsername('');
-    setDescription('');
-    setDuration('');
-    setDate('');
+      console.log(response.data);
+      history.push('/exercises'); // Redirect to exercises page on successful add
+    } catch (error) {
+      console.error('Add exercise error:', error);
+    }
   };
 
   return (
     <div className="p-4 bg-white rounded-md shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Add Exercise</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter username"
-          className="border border-gray-300 rounded-md p-2 w-full"
-          required
-        />
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter exercise description"
-          className="border border-gray-300 rounded-md p-2 w-full"
-          required
-        />
-        <input
-          type="number"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          placeholder="Enter duration in minutes"
-          className="border border-gray-300 rounded-md p-2 w-full"
-          required
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-full"
-          required
-        />
-        <button type="submit" className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-md">
+      <h2 className="text-2xl font-bold mb-4">Add New Exercise</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="description" className="block font-medium mb-2">
+            Description:
+          </label>
+          <input
+            type="text"
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="duration" className="block font-medium mb-2">
+            Duration (in minutes):
+          </label>
+          <input
+            type="number"
+            id="duration"
+            name="duration"
+            value={formData.duration}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="date" className="block font-medium mb-2">
+            Date:
+          </label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+        >
           Add Exercise
         </button>
       </form>
     </div>
   );
-}
+};
+
+export default AddExerciseForm;

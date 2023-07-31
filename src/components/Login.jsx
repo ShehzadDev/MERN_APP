@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,23 +19,15 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await axios.post('http://localhost:5000/auth/login', formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 200) {
+        const { token } = response.data;
         // Save the token in local storage or use a state management library like Redux
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', token);
         history.push('/exercises'); // Redirect to the exercises page on successful login
       } else {
-        // Handle login error here
-        console.error(data.message);
+        console.error('Login error:', response.data.message);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -85,6 +78,7 @@ const Login = () => {
       </div>
     </div>
   );
+
 };
 
 export default Login;
